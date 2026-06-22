@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Diagnóstico | Mentoria Espartana Semana 3</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #141b26;
+  --surface-2: #1b2534;
+  --surface-3: #222e42;
+  --line: #314058;
+  --text: #edf2f7;
+  --muted: #9aa8bd;
+  --gold: #d4a843;
+  --gold-2: #f0c060;
+  --red: #e05252;
+  --green: #4caf82;
+  --blue: #5b8dee;
+  --purple: #9b6ddc;
+  --shadow: 0 18px 60px rgba(0,0,0,.32);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(13,17,23,.86), rgba(13,17,23,1) 320px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, transparent 1px, transparent 80px);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 56px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand > div {
+  min-width: 0;
+}
+
+.mark {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(212,168,67,.55);
+  background: linear-gradient(145deg, rgba(212,168,67,.18), rgba(224,82,82,.1));
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--gold-2);
+  font-weight: 900;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+
+.brand-kicker {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+.brand-title {
+  font-size: clamp(20px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0;
+  margin-top: 2px;
+}
+
+.brand-sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 9px 13px;
+  font-weight: 800;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.btn:hover { transform: translateY(-1px); border-color: var(--gold); }
+.btn.primary { background: var(--gold); color: #111; border-color: var(--gold); }
+.btn.danger { color: #ffb4b4; border-color: rgba(224,82,82,.45); }
+.btn.ghost { background: transparent; }
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.statement, .scoreboard, .results, .criterion, .pillar-summary {
+  background: rgba(20,27,38,.92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.statement {
+  padding: 20px;
+}
+
+.statement h1 {
+  font-size: clamp(24px, 4vw, 46px);
+  line-height: 1.02;
+  letter-spacing: 0;
+  margin: 0 0 12px;
+}
+
+.statement p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.strike {
+  border-left: 4px solid var(--red);
+  color: #ffc0c0;
+  font-weight: 800;
+  margin-top: 16px;
+  padding: 10px 13px;
+  background: rgba(224,82,82,.08);
+  border-radius: 0 7px 7px 0;
+}
+
+.scoreboard {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metric {
+  border: 1px solid rgba(255,255,255,.08);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 88px;
+  min-width: 0;
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-top: 7px;
+}
+
+.metric-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.rule {
+  color: var(--gold-2);
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.progress-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(13,17,23,.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(49,64,88,.75);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  padding: 12px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #27334a;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+  transition: width .2s ease;
+}
+
+.pillar {
+  margin: 22px 0;
+  min-width: 0;
+}
+
+.pillar-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.pillar h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.pillar p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.pill-tag {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.tag-entrega { color: var(--gold); }
+.tag-previsibilidade { color: var(--blue); }
+.tag-alinhamento { color: var(--green); }
+.tag-consistência { color: var(--purple); }
+
+.criteria {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.criterion {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 106px minmax(240px, .9fr);
+  gap: 14px;
+  padding: 14px;
+  box-shadow: none;
+}
+
+.criterion > div {
+  min-width: 0;
+}
+
+.criterion-title {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+
+.criterion-question {
+  color: #dce5f2;
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+.criterion-rule {
+  color: var(--gold-2);
+  background: rgba(212,168,67,.08);
+  border-left: 3px solid rgba(212,168,67,.45);
+  border-radius: 0 6px 6px 0;
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
+.score-control {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+.score-control label, .proof-control label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 900;
+  margin-bottom: 7px;
+}
+
+.score-input {
+  width: 100%;
+  flex: 1;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 34px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+}
+
+.score-input:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,168,67,.14);
+}
+
+.score-hint {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 98px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 10px 11px;
+  outline: none;
+}
+
+.criterion.invalid {
+  border-color: rgba(224,82,82,.7);
+  background: rgba(224,82,82,.06);
+}
+
+.field-error {
+  display: none;
+  margin-top: 6px;
+  color: #ffb4b4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.criterion.invalid .field-error { display: block; }
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 22px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.actions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.results {
+  padding: 18px;
+  margin-top: 20px;
+}
+
+.results[hidden] { display: none; }
+
+.results-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.results h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.diagnosis-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  padding: 7px 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 14px;
+}
+
+.pillar-summary {
+  box-shadow: none;
+  padding: 14px;
+  background: var(--surface-2);
+}
+
+.pillar-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.pillar-bar-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 68px;
+  gap: 10px;
+  align-items: center;
+}
+
+.pillar-name {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mini-bar {
+  height: 12px;
+  background: #27334a;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mini-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  transition: width .3s ease;
+}
+
+.pillar-number {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.analysis-block {
+  background: var(--surface-2);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.analysis-block h3 {
+  margin: 0 0 8px;
+  color: var(--gold-2);
+  font-size: 15px;
+}
+
+.analysis-block p {
+  margin: 0;
+  color: #dce5f2;
+}
+
+.copy-area {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 10px;
+  color: #eaf0f7;
+}
+
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+  background: var(--green);
+  color: #06130d;
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-weight: 900;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.footer-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.runtime-warning {
+  border: 1px solid rgba(224,82,82,.55);
+  background: rgba(224,82,82,.1);
+  color: #ffd0d0;
+  border-radius: 8px;
+  padding: 14px;
+  margin: 16px 0;
+  font-weight: 800;
+}
+
+.script-ok .requires-script {
+  display: none;
+}
+
+.btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .topbar, .intro, .results-grid, .results-head {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar { justify-content: flex-start; }
+
+  .criterion {
+    grid-template-columns: 1fr;
+  }
+
+  .score-control {
+    min-height: auto;
+  }
+
+  .score-input {
+    min-height: 58px;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .action-buttons, .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  .shell {
+    width: calc(100% - 20px);
+    max-width: 1180px;
+    padding-top: 14px;
+  }
+
+  .brand, .toolbar {
+    width: 100%;
+  }
+
+  .brand {
+    align-items: flex-start;
+  }
+
+  .brand-title { font-size: 26px; }
+  .brand-title, .statement h1, .criterion-question, .criterion-rule, .strike, .rule, textarea {
+    overflow-wrap: anywhere;
+  }
+
+  .score-grid { grid-template-columns: 1fr; }
+  .pillar-head { grid-template-columns: 1fr; align-items: start; }
+  .pillar-bar-row { grid-template-columns: 1fr; gap: 5px; }
+  .pillar-number { text-align: left; }
+  .progress-wrap { top: 0; border-radius: 0 0 8px 8px; }
+}
+
+@media print {
+  body { background: #fff; color: #111; }
+  .topbar, .progress-wrap, form, .actions, .footer-note, .toast { display: none !important; }
+  .shell { width: 100%; padding: 0; }
+  .results[hidden] { display: none !important; }
+  .results {
+    display: block !important;
+    box-shadow: none;
+    border: 1px solid #bbb;
+    color: #111;
+  }
+  .analysis-block, .pillar-summary {
+    background: #fff;
+    color: #111;
+    border-color: #bbb;
+  }
+  .copy-area { color: #111; border-color: #bbb; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">ME</div>
+      <div>
+        <div class="brand-kicker">Mentoria Espartana do Chef Marcelão</div>
+        <div class="brand-title">Auto Diagnóstico da Semana 3</div>
+        <div class="brand-sub">Competência não vira confiança sozinha</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn ghost" type="button" id="printTopBtn">Imprimir</button>
+      <button class="btn danger" type="button" id="clearTopBtn">Limpar</button>
+    </div>
+  </header>
+
+  <section class="intro" aria-label="Introdução">
+    <div class="statement">
+      <h1>Confiança é o que o dono consegue prever sobre você.</h1>
+      <p>Você vai avaliar 12 critérios ligados aos quatro pilares: entrega, previsibilidade, alinhamento e consistência.</p>
+      <p>Não responda para ficar bonito. Responda para enxergar onde você ainda vira risco.</p>
+      <div class="strike">Nota sem prova não vale. Se você não consegue escrever a evidência, baixe a nota.</div>
+    </div>
+    <aside class="scoreboard" aria-label="Resumo de preenchimento">
+      <div class="score-grid">
+        <div class="metric">
+          <div class="metric-label">Respondidos</div>
+          <div class="metric-value" id="answeredMetric">0/12</div>
+          <div class="metric-note">nota + prova concreta</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total possível</div>
+          <div class="metric-value">120</div>
+          <div class="metric-note">12 critérios de 0 a 10</div>
+        </div>
+      </div>
+      <div class="rule">O resultado só aparece depois que você finalizar tudo e clicar em calcular.</div>
+    </aside>
+  </section>
+
+  <div class="progress-wrap" aria-label="Progresso">
+    <div class="progress-top">
+      <span id="progressText">0% preenchido</span>
+      <span id="savedText">Progresso salvo neste computador</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="runtime-warning requires-script" id="jsBlockedWarning">
+    Atenção: este modo de abertura está bloqueando o cálculo. Se esta faixa continuar aparecendo, abra o arquivo no navegador do celular, como Chrome ou Safari, usando a opção "Abrir com" ou "Compartilhar para o navegador". Preview de WhatsApp, Drive, Gmail e alguns gerenciadores de arquivo podem mostrar o formulário, mas bloqueiam a totalização.
+  </div>
+
+  <form id="diagnosticForm" action="#" onsubmit="return window.handleCalculate ? window.handleCalculate(event) : false;" novalidate>
+    <noscript>
+      <div class="runtime-warning">Para calcular o resultado, abra este arquivo em um navegador com JavaScript ativo, como Chrome, Safari ou Edge. As perguntas ficam visíveis abaixo, mas a totalização precisa do navegador completo.</div>
+    </noscript>
+    <div id="questionnaire">
+      <section class="pillar" id="pillar-Entrega">
+        <div class="pillar-head">
+          <div>
+            <h2>Entrega</h2>
+            <p>Resultado real, mensurável e visível para quem decide.</p>
+          </div>
+          <div class="pill-tag tag-entrega">3 critérios</div>
+        </div>
+        <div class="criteria">
+          <article class="criterion" id="criterion-0" data-index="0" data-pillar="Entrega">
+            <div>
+              <div class="criterion-title">Resultado com número</div>
+              <div class="criterion-question">Você tem um número real, como CMV, custo, volume, tempo de produção ou perda, do resultado que gerou no último mês?</div>
+              <div class="criterion-rule">Sem número real: teto 3. "Trabalhei muito" não é prova de entrega.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-0">Nota</label>
+              <input class="score-input" id="score-0" name="score-0" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-0">
+              <div class="score-hint" id="score-hint-0">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-0">Prova concreta</label>
+              <textarea id="proof-0" name="proof-0" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-1" data-index="1" data-pillar="Entrega">
+            <div>
+              <div class="criterion-title">Consistência de resultado</div>
+              <div class="criterion-question">Esse resultado se repete há quantos meses? O dono vê padrão ou vê pico?</div>
+              <div class="criterion-rule">Menos de 3 meses de histórico: teto 5. Para nota 7 ou mais, precisa de pelo menos 6 meses.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-1">Nota</label>
+              <input class="score-input" id="score-1" name="score-1" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-1">
+              <div class="score-hint" id="score-hint-1">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-1">Prova concreta</label>
+              <textarea id="proof-1" name="proof-1" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-2" data-index="2" data-pillar="Entrega">
+            <div>
+              <div class="criterion-title">Resultado em crise</div>
+              <div class="criterion-question">No último período de conflito ou pressão, você manteve o resultado ou ele caiu?</div>
+              <div class="criterion-rule">Se o resultado oscila quando há conflito ou pressão: teto 5. Entrega condicionada ao humor não é entrega.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-2">Nota</label>
+              <input class="score-input" id="score-2" name="score-2" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-2">
+              <div class="score-hint" id="score-hint-2">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-2">Prova concreta</label>
+              <textarea id="proof-2" name="proof-2" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="pillar" id="pillar-Previsibilidade">
+        <div class="pillar-head">
+          <div>
+            <h2>Previsibilidade</h2>
+            <p>O dono sabe o que esperar de você quando a pressão sobe.</p>
+          </div>
+          <div class="pill-tag tag-previsibilidade">3 critérios</div>
+        </div>
+        <div class="criteria">
+          <article class="criterion" id="criterion-3" data-index="3" data-pillar="Previsibilidade">
+            <div>
+              <div class="criterion-title">Reação à contrariedade</div>
+              <div class="criterion-question">O dono saberia, sem perguntar, o que você faz nas 24 horas depois de uma decisão com que discorda?</div>
+              <div class="criterion-rule">Para nota 7 ou mais: mínimo de 3 situações comprovadas. Para nota 9 ou 10: histórico de 1 ano.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-3">Nota</label>
+              <input class="score-input" id="score-3" name="score-3" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-3">
+              <div class="score-hint" id="score-hint-3">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-3">Prova concreta</label>
+              <textarea id="proof-3" name="proof-3" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-4" data-index="4" data-pillar="Previsibilidade">
+            <div>
+              <div class="criterion-title">Comportamento na ausência</div>
+              <div class="criterion-question">Seu comportamento, postura e entrega são iguais quando o dono não está presente?</div>
+              <div class="criterion-rule">Autopercepção não é prova. Sem evidência de terceiros que confirmaria isso: teto 6.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-4">Nota</label>
+              <input class="score-input" id="score-4" name="score-4" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-4">
+              <div class="score-hint" id="score-hint-4">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-4">Prova concreta</label>
+              <textarea id="proof-4" name="proof-4" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-5" data-index="5" data-pillar="Previsibilidade">
+            <div>
+              <div class="criterion-title">Canal de problemas</div>
+              <div class="criterion-question">O dono descobre os problemas da área por você, ou descobre por outro caminho?</div>
+              <div class="criterion-rule">Se não lembra da última vez que comunicou um problema antes de ser cobrado: teto 4.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-5">Nota</label>
+              <input class="score-input" id="score-5" name="score-5" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-5">
+              <div class="score-hint" id="score-hint-5">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-5">Prova concreta</label>
+              <textarea id="proof-5" name="proof-5" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="pillar" id="pillar-Alinhamento">
+        <div class="pillar-head">
+          <div>
+            <h2>Alinhamento</h2>
+            <p>Você protege a empresa mesmo quando está contrariado.</p>
+          </div>
+          <div class="pill-tag tag-alinhamento">3 critérios</div>
+        </div>
+        <div class="criteria">
+          <article class="criterion" id="criterion-6" data-index="6" data-pillar="Alinhamento">
+            <div>
+              <div class="criterion-title">Proteção da empresa</div>
+              <div class="criterion-question">Nos últimos 30 dias, você disse algo sobre o dono, a empresa ou uma decisão para a equipe que ele não deveria ouvir?</div>
+              <div class="criterion-rule">Se precisou pensar mais de 5 segundos: provavelmente aconteceu. Teto 5.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-6">Nota</label>
+              <input class="score-input" id="score-6" name="score-6" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-6">
+              <div class="score-hint" id="score-hint-6">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-6">Prova concreta</label>
+              <textarea id="proof-6" name="proof-6" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-7" data-index="7" data-pillar="Alinhamento">
+            <div>
+              <div class="criterion-title">Protocolo de discordância</div>
+              <div class="criterion-question">Na última decisão com que discordou, você foi direto a quem decidiu ou foi primeiro para a equipe?</div>
+              <div class="criterion-rule">Se reclamou com a equipe antes de falar com quem decidiu: teto 4.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-7">Nota</label>
+              <input class="score-input" id="score-7" name="score-7" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-7">
+              <div class="score-hint" id="score-hint-7">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-7">Prova concreta</label>
+              <textarea id="proof-7" name="proof-7" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-8" data-index="8" data-pillar="Alinhamento">
+            <div>
+              <div class="criterion-title">Postura com externos</div>
+              <div class="criterion-question">O que você diz sobre a empresa para candidatos, fornecedores e clientes quando o dono não está?</div>
+              <div class="criterion-rule">Nota 7 ou mais exige exemplo concreto de proteção ativa nos últimos 3 meses. Intenção não é prova.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-8">Nota</label>
+              <input class="score-input" id="score-8" name="score-8" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-8">
+              <div class="score-hint" id="score-hint-8">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-8">Prova concreta</label>
+              <textarea id="proof-8" name="proof-8" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="pillar" id="pillar-Consistência">
+        <div class="pillar-head">
+          <div>
+            <h2>Consistência</h2>
+            <p>Seu padrão se repete por tempo suficiente para virar confiança.</p>
+          </div>
+          <div class="pill-tag tag-consistência">3 critérios</div>
+        </div>
+        <div class="criteria">
+          <article class="criterion" id="criterion-9" data-index="9" data-pillar="Consistência">
+            <div>
+              <div class="criterion-title">Hábito verificável</div>
+              <div class="criterion-question">Existe algo específico que você faz toda semana e que o dono pode verificar sem te perguntar?</div>
+              <div class="criterion-rule">Se esse hábito não existe: nota 1. Consistência sem hábito concreto é ilusão.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-9">Nota</label>
+              <input class="score-input" id="score-9" name="score-9" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-9">
+              <div class="score-hint" id="score-hint-9">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-9">Prova concreta</label>
+              <textarea id="proof-9" name="proof-9" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-10" data-index="10" data-pillar="Consistência">
+            <div>
+              <div class="criterion-title">Período de estabilidade</div>
+              <div class="criterion-question">Há quantos meses você mantém o mesmo padrão de comportamento e entrega, sem pico nem queda?</div>
+              <div class="criterion-rule">Menos de 3 meses: teto 5. Mudança recente de comportamento ainda é promessa, não consistência.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-10">Nota</label>
+              <input class="score-input" id="score-10" name="score-10" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-10">
+              <div class="score-hint" id="score-hint-10">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-10">Prova concreta</label>
+              <textarea id="proof-10" name="proof-10" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+          <article class="criterion" id="criterion-11" data-index="11" data-pillar="Consistência">
+            <div>
+              <div class="criterion-title">Comportamento pós-pancada</div>
+              <div class="criterion-question">Nos 3 dias depois da última contrariedade ou conflito, sua entrega ficou igual, melhorou ou caiu?</div>
+              <div class="criterion-rule">Se não consegue lembrar de uma situação concreta: teto 5. Memória seletiva é sinal de problema.</div>
+            </div>
+            <div class="score-control">
+              <label for="score-11">Nota</label>
+              <input class="score-input" id="score-11" name="score-11" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-11">
+              <div class="score-hint" id="score-hint-11">0 a 10</div>
+            </div>
+            <div class="proof-control">
+              <label for="proof-11">Prova concreta</label>
+              <textarea id="proof-11" name="proof-11" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+              <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <section class="actions" aria-label="Finalizar diagnóstico">
+      <p>Quando terminar, clique em calcular. A análise aparece só depois do preenchimento completo.</p>
+      <div class="action-buttons">
+        <button class="btn danger" type="button" id="clearBtn">Limpar respostas</button>
+        <button class="btn primary" type="button" id="calcBtn" onclick="return window.handleCalculate ? window.handleCalculate(event) : false;" disabled>Calcular diagnóstico</button>
+      </div>
+    </section>
+  </form>
+
+  <section class="results" id="results" hidden aria-live="polite">
+    <div class="results-head">
+      <div>
+        <h2 id="resultTitle">Resultado</h2>
+        <p id="resultLead"></p>
+      </div>
+      <div class="diagnosis-label" id="diagnosisLabel">Aguardando</div>
+    </div>
+
+    <div class="score-grid" style="margin-bottom:14px">
+      <div class="metric">
+        <div class="metric-label">Pontuação total</div>
+        <div class="metric-value" id="totalScore">0/120</div>
+        <div class="metric-note">soma de todos os critérios</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Média geral</div>
+        <div class="metric-value" id="averageScore">0.0</div>
+        <div class="metric-note">escala de 0 a 10</div>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="pillar-summary">
+        <div class="metric-label" style="margin-bottom:12px">Pilares</div>
+        <div class="pillar-bars" id="pillarBars"></div>
+      </div>
+      <div>
+        <div class="analysis-block">
+          <h3>Leitura direta</h3>
+          <p id="mainAnalysis"></p>
+        </div>
+        <div class="analysis-block">
+          <h3 id="focusHeading">Pilar de atenção</h3>
+          <p id="weakAnalysis"></p>
+        </div>
+        <div class="analysis-block">
+          <h3>Plano de 7 dias</h3>
+          <p id="actionPlan"></p>
+        </div>
+        <div class="analysis-block">
+          <h3>Resumo para copiar</h3>
+          <p>Use este texto no seu caderno, email ou relatório pessoal.</p>
+          <textarea class="copy-area" id="copySummary" readonly></textarea>
+          <div class="action-buttons" style="margin-top:10px">
+            <button class="btn" type="button" id="copyBtn">Copiar resumo</button>
+            <button class="btn" type="button" id="printBtn">Imprimir resultado</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">Arquivo offline. Nenhuma resposta é enviada para fora do computador.</div>
+</div>
+
+<div class="toast" id="toast">Resumo copiado</div>
+
+<script>
+// FALLBACK_DIAG_START
+(function () {
+  var pillarOrder = ['Entrega', 'Previsibilidade', 'Alinhamento', 'Consistência'];
+  var criterionPillars = [
+    'Entrega', 'Entrega', 'Entrega',
+    'Previsibilidade', 'Previsibilidade', 'Previsibilidade',
+    'Alinhamento', 'Alinhamento', 'Alinhamento',
+    'Consistência', 'Consistência', 'Consistência'
+  ];
+
+  var bands = [
+    { key: 'risco', min: 0, max: 3, label: 'Risco forte', color: '#e05252', analysis: 'Hoje o dono ainda precisa vigiar mais do que confiar. Existe muita intenção e pouca prova. O trabalho desta semana é parar de se defender e produzir evidência verificável.' },
+    { key: 'instavel', min: 3.01, max: 6, label: 'Confiança instável', color: '#d4a843', analysis: 'Você tem sinais de competência, mas a confiança ainda oscila. O dono pode até reconhecer valor, mas ainda não tem previsibilidade suficiente para apostar mais poder sem custo de gestão.' },
+    { key: 'construcao', min: 6.01, max: 8, label: 'Confiança em construção', color: '#5b8dee', analysis: 'Você já tem evidências úteis, mas ainda precisa transformar episódios bons em histórico. O próximo passo é repetir o comportamento por tempo suficiente para virar expectativa.' },
+    { key: 'forca', min: 8.01, max: 10, label: 'Força comprovada', color: '#4caf82', analysis: 'Você já opera com boa evidência de confiança. O risco agora é achar que o saldo é permanente. Confiança é percepção atualizada, então continue documentando e protegendo o padrão.' }
+  ];
+
+  var pillarAdvice = {
+    'Entrega': {
+      risk: 'Entrega fraca significa que você pode estar pedindo confiança com base em esforço, presença ou reputação. Dono não lê esforço: dono lê número.',
+      action: 'Comece um relatório diário de Área, Situação e Reflexão com pelo menos um número real por dia: CMV, perda, volume, tempo, ocorrência ou custo.'
+    },
+    'Previsibilidade': {
+      risk: 'Previsibilidade fraca significa que o dono ainda precisa adivinhar como você reage quando algo dá errado. Quem precisa ser adivinhado custa caro de gerir.',
+      action: 'Use um protocolo de problema por 7 dias: o que aconteceu, o que foi feito e o que muda daqui para frente. Comunique antes de ser cobrado.'
+    },
+    'Alinhamento': {
+      risk: 'Alinhamento fraco significa que sua contrariedade pode virar ruído para a equipe. O dono percebe quando você protege a empresa só enquanto concorda.',
+      action: 'Pratique discordância com dado e proposta: fale com quem decide, apresente o risco, proponha um teste curto e não use a equipe como plateia.'
+    },
+    'Consistência': {
+      risk: 'Consistência fraca significa que você pode ter pico, mas ainda não virou histórico. O dono planeja com média, não com lembrança de um dia excelente.',
+      action: 'Escolha um hábito verificável e cumpra no mesmo horário por 7 dias. Registre a evidência todos os dias, mesmo quando o dia for feio.'
+    }
+  };
+
+  var maintenanceStrong = {
+    heading: 'Manutenção da força',
+    label: 'Nenhum pilar fraco detectado',
+    risk: 'Todos os pilares ficaram em zona alta. O ponto de atenção não é corrigir uma fraqueza, é provar que esse 10 não é autopercepção: precisa existir número, histórico e validação fora da sua própria cabeça.',
+    action: 'Plano de manutenção por 7 dias: mantenha um relatório curto diário, registre uma evidência por pilar e peça validação externa de pelo menos uma pessoa que enxerga sua operação.'
+  };
+
+  var maintenanceEven = {
+    heading: 'Padrão geral de evidência',
+    label: 'Todos os pilares estão no mesmo patamar',
+    risk: 'Não existe um pilar isolado puxando o resultado para baixo. O diagnóstico aponta um padrão geral: falta evidência acumulada em todos os lados, não apenas em um comportamento.',
+    action: 'Plano de 7 dias: escolha o hábito mais barato de começar amanhã, registre uma evidência diária e volte ao diagnóstico depois de uma semana.'
+  };
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function setText(id, value) {
+    var node = byId(id);
+    if (node) node.textContent = value;
+  }
+
+  function markScriptReady() {
+    var calc = byId('calcBtn');
+    if (document.body) document.body.className += ' script-ok';
+    if (calc) {
+      calc.disabled = false;
+      calc.removeAttribute('disabled');
+    }
+  }
+
+  function clampScore(value) {
+    var numeric = parseInt(value, 10);
+    if (isNaN(numeric)) return 0;
+    if (numeric < 0) return 0;
+    if (numeric > 10) return 10;
+    return numeric;
+  }
+
+  function round1(value) {
+    return Math.round(value * 10) / 10;
+  }
+
+  function scoreBand(average) {
+    var i;
+    for (i = 0; i < bands.length; i++) {
+      if (average >= bands[i].min && average <= bands[i].max) return bands[i];
+    }
+    return bands[0];
+  }
+
+  function scoreColor(score) {
+    if (score <= 3) return '#e05252';
+    if (score <= 6) return '#d4a843';
+    if (score <= 8) return '#5b8dee';
+    return '#4caf82';
+  }
+
+  function getResponses() {
+    var responses = [];
+    var i;
+    var scoreInput;
+    var proofInput;
+    for (i = 0; i < 12; i++) {
+      scoreInput = byId('score-' + i);
+      proofInput = byId('proof-' + i);
+      responses.push({
+        index: i,
+        pillar: criterionPillars[i],
+        scoreRaw: scoreInput ? scoreInput.value : '',
+        score: scoreInput ? clampScore(scoreInput.value) : 0,
+        proof: proofInput ? String(proofInput.value || '').replace(/^\s+|\s+$/g, '') : ''
+      });
+    }
+    return responses;
+  }
+
+  function validateResponses(responses) {
+    var firstInvalid = null;
+    var i;
+    var response;
+    var article;
+    var scoreNumber;
+    var validScore;
+    var validProof;
+    for (i = 0; i < responses.length; i++) {
+      response = responses[i];
+      article = byId('criterion-' + response.index);
+      scoreNumber = Number(response.scoreRaw);
+      validScore = response.scoreRaw !== '' && !isNaN(scoreNumber) && scoreNumber >= 0 && scoreNumber <= 10;
+      validProof = response.proof.length >= 3;
+      if (article) {
+        article.style.borderColor = validScore && validProof ? '' : 'rgba(224,82,82,.85)';
+      }
+      if ((!validScore || !validProof) && !firstInvalid) firstInvalid = article || byId('score-' + response.index);
+    }
+    if (firstInvalid) {
+      if (firstInvalid.scrollIntoView) firstInvalid.scrollIntoView();
+      alert('Preencha nota e prova concreta em todos os critérios antes de calcular.');
+      return false;
+    }
+    return true;
+  }
+
+  function calculateDiagnosis(responses) {
+    var total = 0;
+    var i;
+    var p;
+    var average;
+    var band;
+    var pillarScores = [];
+    var items;
+    var pillarTotal;
+    var pillarAverage;
+    var sorted;
+    var weakestAverage;
+    var strongestAverage;
+    var weakest = [];
+    var strongest = [];
+    var allPillarsTied;
+    var focusHeading = 'Pilar de atenção';
+    var focusLabel = '';
+    var weakRisk = '';
+    var actionPlan = '';
+    var advice;
+    var summary;
+
+    for (i = 0; i < responses.length; i++) total += responses[i].score;
+    average = responses.length ? round1(total / responses.length) : 0;
+    band = scoreBand(average);
+
+    for (p = 0; p < pillarOrder.length; p++) {
+      items = 0;
+      pillarTotal = 0;
+      for (i = 0; i < responses.length; i++) {
+        if (responses[i].pillar === pillarOrder[p]) {
+          items++;
+          pillarTotal += responses[i].score;
+        }
+      }
+      pillarAverage = items ? round1(pillarTotal / items) : 0;
+      pillarScores.push({ pillar: pillarOrder[p], total: pillarTotal, max: items * 10, average: pillarAverage, count: items });
+    }
+
+    sorted = pillarScores.slice(0).sort(function (a, b) {
+      if (a.average !== b.average) return a.average - b.average;
+      return a.pillar < b.pillar ? -1 : a.pillar > b.pillar ? 1 : 0;
+    });
+    weakestAverage = sorted.length ? sorted[0].average : 0;
+    strongestAverage = sorted.length ? sorted[sorted.length - 1].average : 0;
+    for (i = 0; i < sorted.length; i++) {
+      if (sorted[i].average === weakestAverage) weakest.push(sorted[i]);
+      if (sorted[i].average === strongestAverage) strongest.push(sorted[i]);
+    }
+    allPillarsTied = weakest.length === pillarScores.length;
+
+    if (weakestAverage >= 8) {
+      focusHeading = maintenanceStrong.heading;
+      focusLabel = maintenanceStrong.label;
+      weakRisk = maintenanceStrong.risk;
+      actionPlan = maintenanceStrong.action;
+    } else if (allPillarsTied) {
+      focusHeading = maintenanceEven.heading;
+      focusLabel = maintenanceEven.label;
+      weakRisk = maintenanceEven.risk;
+      actionPlan = maintenanceEven.action;
+    } else {
+      advice = pillarAdvice[weakest[0].pillar] || pillarAdvice.Entrega;
+      focusLabel = weakest.map(function (item) { return item.pillar + ' (' + item.average + '/10)'; }).join(', ');
+      weakRisk = advice.risk;
+      actionPlan = advice.action;
+    }
+
+    summary = [
+      'Auto Diagnóstico da Semana 3 - Mentoria Espartana',
+      'Pontuação total: ' + total + '/' + (responses.length * 10),
+      'Média geral: ' + average + '/10',
+      'Diagnóstico: ' + band.label,
+      'Pilar de atenção: ' + focusLabel,
+      'Pilar mais forte: ' + strongest.map(function (item) { return item.pillar + ' (' + item.average + '/10)'; }).join(', '),
+      'Leitura: ' + band.analysis,
+      'Leitura do foco: ' + weakRisk,
+      'Plano de 7 dias: ' + actionPlan
+    ].join('\n');
+
+    return {
+      total: total,
+      max: responses.length * 10,
+      average: average,
+      band: band,
+      pillarScores: pillarScores,
+      focusHeading: focusHeading,
+      focusLabel: focusLabel,
+      weakRisk: weakRisk,
+      actionPlan: actionPlan,
+      summary: summary
+    };
+  }
+
+  function renderResults(result) {
+    var label = byId('diagnosisLabel');
+    var results = byId('results');
+    var copySummary = byId('copySummary');
+    var pillarBars = byId('pillarBars');
+    var html = '';
+    var i;
+
+    setText('resultTitle', 'Diagnóstico: ' + result.band.label);
+    setText('resultLead', result.band.analysis);
+    setText('diagnosisLabel', result.band.label);
+    if (label) label.style.color = result.band.color;
+    setText('totalScore', result.total + '/' + result.max);
+    setText('averageScore', result.average.toFixed(1) + '/10');
+    setText('mainAnalysis', result.band.analysis);
+    setText('focusHeading', result.focusHeading);
+    setText('weakAnalysis', result.focusLabel + '. ' + result.weakRisk);
+    setText('actionPlan', result.actionPlan);
+    if (copySummary) copySummary.value = result.summary;
+
+    if (pillarBars) {
+      for (i = 0; i < result.pillarScores.length; i++) {
+        html += '<div class="pillar-bar-row"><div class="pillar-name">' + result.pillarScores[i].pillar + '</div><div class="mini-bar"><div class="mini-fill" style="width:' + (result.pillarScores[i].average * 10) + '%; background:' + scoreColor(result.pillarScores[i].average) + '"></div></div><div class="pillar-number">' + result.pillarScores[i].total + '/' + result.pillarScores[i].max + '</div></div>';
+      }
+      pillarBars.innerHTML = html;
+    }
+
+    if (results) {
+      results.hidden = false;
+      results.removeAttribute('hidden');
+      results.style.display = 'block';
+      if (results.scrollIntoView) results.scrollIntoView();
+    }
+  }
+
+  function updateProgressFallback() {
+    var responses = getResponses();
+    var answered = 0;
+    var i;
+    var percent;
+    for (i = 0; i < responses.length; i++) {
+      if (responses[i].scoreRaw !== '' && responses[i].proof.length >= 3) answered++;
+    }
+    percent = Math.round((answered / 12) * 100);
+    setText('answeredMetric', answered + '/12');
+    setText('progressText', percent + '% preenchido');
+    setText('savedText', 'Preenchimento ativo nesta tela');
+    if (byId('progressFill')) byId('progressFill').style.width = percent + '%';
+  }
+
+  window.handleCalculate = function (event) {
+    var responses;
+    var result;
+    if (event && event.preventDefault) event.preventDefault();
+    responses = getResponses();
+    if (!validateResponses(responses)) return false;
+    result = calculateDiagnosis(responses);
+    renderResults(result);
+    return false;
+  };
+
+  for (var inputIndex = 0; inputIndex < 12; inputIndex++) {
+    if (byId('score-' + inputIndex) && byId('score-' + inputIndex).addEventListener) byId('score-' + inputIndex).addEventListener('input', updateProgressFallback);
+    if (byId('proof-' + inputIndex) && byId('proof-' + inputIndex).addEventListener) byId('proof-' + inputIndex).addEventListener('input', updateProgressFallback);
+  }
+  markScriptReady();
+  updateProgressFallback();
+}());
+// FALLBACK_DIAG_END
+</script>
+
+<script>
+// CORE_DIAG_START
+(function () {
+  const pillarOrder = ['Entrega', 'Previsibilidade', 'Alinhamento', 'Consistência'];
+
+  const criteria = [
+    {
+      pillar: 'Entrega',
+      title: 'Resultado com número',
+      question: 'Você tem um número real, como CMV, custo, volume, tempo de produção ou perda, do resultado que gerou no último mês?',
+      rule: 'Sem número real: teto 3. "Trabalhei muito" não é prova de entrega.'
+    },
+    {
+      pillar: 'Entrega',
+      title: 'Consistência de resultado',
+      question: 'Esse resultado se repete há quantos meses? O dono vê padrão ou vê pico?',
+      rule: 'Menos de 3 meses de histórico: teto 5. Para nota 7 ou mais, precisa de pelo menos 6 meses.'
+    },
+    {
+      pillar: 'Entrega',
+      title: 'Resultado em crise',
+      question: 'No último período de conflito ou pressão, você manteve o resultado ou ele caiu?',
+      rule: 'Se o resultado oscila quando há conflito ou pressão: teto 5. Entrega condicionada ao humor não é entrega.'
+    },
+    {
+      pillar: 'Previsibilidade',
+      title: 'Reação à contrariedade',
+      question: 'O dono saberia, sem perguntar, o que você faz nas 24 horas depois de uma decisão com que discorda?',
+      rule: 'Para nota 7 ou mais: mínimo de 3 situações comprovadas. Para nota 9 ou 10: histórico de 1 ano.'
+    },
+    {
+      pillar: 'Previsibilidade',
+      title: 'Comportamento na ausência',
+      question: 'Seu comportamento, postura e entrega são iguais quando o dono não está presente?',
+      rule: 'Autopercepção não é prova. Sem evidência de terceiros que confirmaria isso: teto 6.'
+    },
+    {
+      pillar: 'Previsibilidade',
+      title: 'Canal de problemas',
+      question: 'O dono descobre os problemas da área por você, ou descobre por outro caminho?',
+      rule: 'Se não lembra da última vez que comunicou um problema antes de ser cobrado: teto 4.'
+    },
+    {
+      pillar: 'Alinhamento',
+      title: 'Proteção da empresa',
+      question: 'Nos últimos 30 dias, você disse algo sobre o dono, a empresa ou uma decisão para a equipe que ele não deveria ouvir?',
+      rule: 'Se precisou pensar mais de 5 segundos: provavelmente aconteceu. Teto 5.'
+    },
+    {
+      pillar: 'Alinhamento',
+      title: 'Protocolo de discordância',
+      question: 'Na última decisão com que discordou, você foi direto a quem decidiu ou foi primeiro para a equipe?',
+      rule: 'Se reclamou com a equipe antes de falar com quem decidiu: teto 4.'
+    },
+    {
+      pillar: 'Alinhamento',
+      title: 'Postura com externos',
+      question: 'O que você diz sobre a empresa para candidatos, fornecedores e clientes quando o dono não está?',
+      rule: 'Nota 7 ou mais exige exemplo concreto de proteção ativa nos últimos 3 meses. Intenção não é prova.'
+    },
+    {
+      pillar: 'Consistência',
+      title: 'Hábito verificável',
+      question: 'Existe algo específico que você faz toda semana e que o dono pode verificar sem te perguntar?',
+      rule: 'Se esse hábito não existe: nota 1. Consistência sem hábito concreto é ilusão.'
+    },
+    {
+      pillar: 'Consistência',
+      title: 'Período de estabilidade',
+      question: 'Há quantos meses você mantém o mesmo padrão de comportamento e entrega, sem pico nem queda?',
+      rule: 'Menos de 3 meses: teto 5. Mudança recente de comportamento ainda é promessa, não consistência.'
+    },
+    {
+      pillar: 'Consistência',
+      title: 'Comportamento pós-pancada',
+      question: 'Nos 3 dias depois da última contrariedade ou conflito, sua entrega ficou igual, melhorou ou caiu?',
+      rule: 'Se não consegue lembrar de uma situação concreta: teto 5. Memória seletiva é sinal de problema.'
+    }
+  ];
+
+  const bands = [
+    {
+      key: 'risco',
+      min: 0,
+      max: 3,
+      label: 'Risco forte',
+      color: '#e05252',
+      analysis: 'Hoje o dono ainda precisa vigiar mais do que confiar. Existe muita intenção e pouca prova. O trabalho desta semana é parar de se defender e produzir evidência verificável.'
+    },
+    {
+      key: 'instavel',
+      min: 3.01,
+      max: 6,
+      label: 'Confiança instável',
+      color: '#d4a843',
+      analysis: 'Você tem sinais de competência, mas a confiança ainda oscila. O dono pode até reconhecer valor, mas ainda não tem previsibilidade suficiente para apostar mais poder sem custo de gestão.'
+    },
+    {
+      key: 'construcao',
+      min: 6.01,
+      max: 8,
+      label: 'Confiança em construção',
+      color: '#5b8dee',
+      analysis: 'Você já tem evidências úteis, mas ainda precisa transformar episódios bons em histórico. O próximo passo é repetir o comportamento por tempo suficiente para virar expectativa.'
+    },
+    {
+      key: 'forca',
+      min: 8.01,
+      max: 10,
+      label: 'Força comprovada',
+      color: '#4caf82',
+      analysis: 'Você já opera com boa evidência de confiança. O risco agora é achar que o saldo é permanente. Confiança é percepção atualizada, então continue documentando e protegendo o padrão.'
+    }
+  ];
+
+  const pillarAdvice = {
+    'Entrega': {
+      risk: 'Entrega fraca significa que você pode estar pedindo confiança com base em esforço, presença ou reputação. Dono não lê esforço: dono lê número.',
+      action: 'Comece um relatório diário de Área, Situação e Reflexão com pelo menos um número real por dia: CMV, perda, volume, tempo, ocorrência ou custo.'
+    },
+    'Previsibilidade': {
+      risk: 'Previsibilidade fraca significa que o dono ainda precisa adivinhar como você reage quando algo dá errado. Quem precisa ser adivinhado custa caro de gerir.',
+      action: 'Use um protocolo de problema por 7 dias: o que aconteceu, o que foi feito e o que muda daqui para frente. Comunique antes de ser cobrado.'
+    },
+    'Alinhamento': {
+      risk: 'Alinhamento fraco significa que sua contrariedade pode virar ruído para a equipe. O dono percebe quando você protege a empresa só enquanto concorda.',
+      action: 'Pratique discordância com dado e proposta: fale com quem decide, apresente o risco, proponha um teste curto e não use a equipe como plateia.'
+    },
+    'Consistência': {
+      risk: 'Consistência fraca significa que você pode ter pico, mas ainda não virou histórico. O dono planeja com média, não com lembrança de um dia excelente.',
+      action: 'Escolha um hábito verificável e cumpra no mesmo horário por 7 dias. Registre a evidência todos os dias, mesmo quando o dia for feio.'
+    }
+  };
+
+  const maintenanceAdvice = {
+    strong: {
+      heading: 'Manutenção da força',
+      label: 'Nenhum pilar fraco detectado',
+      risk: 'Todos os pilares ficaram em zona alta. O ponto de atenção não é corrigir uma fraqueza, é provar que esse 10 não é autopercepção: precisa existir número, histórico e validação fora da sua própria cabeça.',
+      action: 'Plano de manutenção por 7 dias: mantenha um relatório curto diário, registre uma evidência por pilar e peça validação externa de pelo menos uma pessoa que enxerga sua operação.'
+    },
+    even: {
+      heading: 'Padrão geral de evidência',
+      label: 'Todos os pilares estão no mesmo patamar',
+      risk: 'Não existe um pilar isolado puxando o resultado para baixo. O diagnóstico aponta um padrão geral: falta evidência acumulada em todos os lados, não apenas em um comportamento.',
+      action: 'Plano de 7 dias: escolha o hábito mais barato de começar amanhã, registre uma evidência diária e volte ao diagnóstico depois de uma semana.'
+    }
+  };
+
+  function clampScore(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return 0;
+    if (numeric < 0) return 0;
+    if (numeric > 10) return 10;
+    return Math.round(numeric);
+  }
+
+  function round1(value) {
+    return Math.round(value * 10) / 10;
+  }
+
+  function scoreBand(average) {
+    return bands.find((band) => average >= band.min && average <= band.max) || bands[0];
+  }
+
+  function calculateDiagnosis(responses) {
+    const clean = responses.map((response) => ({
+      pillar: response.pillar,
+      score: clampScore(response.score),
+      proof: String(response.proof || '').trim()
+    }));
+    const total = clean.reduce((sum, response) => sum + response.score, 0);
+    const average = clean.length ? round1(total / clean.length) : 0;
+    const band = scoreBand(average);
+
+    const pillarScores = pillarOrder.map((pillar) => {
+      const items = clean.filter((response) => response.pillar === pillar);
+      const pillarTotal = items.reduce((sum, response) => sum + response.score, 0);
+      const pillarAverage = items.length ? round1(pillarTotal / items.length) : 0;
+      return {
+        pillar,
+        total: pillarTotal,
+        max: items.length * 10,
+        average: pillarAverage,
+        count: items.length
+      };
+    }).filter((pillarScore) => pillarScore.count > 0);
+
+    const sorted = pillarScores.slice().sort((a, b) => a.average - b.average || a.pillar.localeCompare(b.pillar));
+    const weakestAverage = sorted.length ? sorted[0].average : 0;
+    const strongestAverage = sorted.length ? sorted[sorted.length - 1].average : 0;
+    const weakest = sorted.filter((pillarScore) => pillarScore.average === weakestAverage);
+    const strongest = sorted.filter((pillarScore) => pillarScore.average === strongestAverage);
+    const allPillarsTied = weakest.length === pillarScores.length;
+    let focusHeading = 'Pilar de atenção';
+    let focusLabel = weakest.map((item) => `${item.pillar} (${item.average}/10)`).join(', ');
+    let weakRisk;
+    let actionPlan;
+
+    if (weakestAverage >= 8) {
+      focusHeading = maintenanceAdvice.strong.heading;
+      focusLabel = maintenanceAdvice.strong.label;
+      weakRisk = maintenanceAdvice.strong.risk;
+      actionPlan = maintenanceAdvice.strong.action;
+    } else if (allPillarsTied) {
+      focusHeading = maintenanceAdvice.even.heading;
+      focusLabel = maintenanceAdvice.even.label;
+      weakRisk = maintenanceAdvice.even.risk;
+      actionPlan = maintenanceAdvice.even.action;
+    } else {
+      const primaryWeak = weakest[0] || { pillar: 'Entrega', average: 0, total: 0, max: 0 };
+      const advice = pillarAdvice[primaryWeak.pillar] || pillarAdvice.Entrega;
+      weakRisk = advice.risk;
+      actionPlan = advice.action;
+    }
+
+    const summary = [
+      'Auto Diagnóstico da Semana 3 - Mentoria Espartana',
+      `Pontuação total: ${total}/${clean.length * 10}`,
+      `Média geral: ${average}/10`,
+      `Diagnóstico: ${band.label}`,
+      `Pilar de atenção: ${focusLabel}`,
+      `Pilar mais forte: ${strongest.map((item) => `${item.pillar} (${item.average}/10)`).join(', ')}`,
+      `Leitura: ${band.analysis}`,
+      `Leitura do foco: ${weakRisk}`,
+      `Plano de 7 dias: ${actionPlan}`
+    ].join('\n');
+
+    return {
+      total,
+      max: clean.length * 10,
+      average,
+      band,
+      pillarScores,
+      weakest,
+      strongest,
+      focusHeading,
+      focusLabel,
+      weakRisk,
+      actionPlan,
+      summary
+    };
+  }
+
+  window.DiagnosticoMentoria = {
+    criteria,
+    pillarOrder,
+    bands,
+    pillarAdvice,
+    clampScore,
+    scoreBand,
+    calculateDiagnosis
+  };
+})();
+// CORE_DIAG_END
+
+(function () {
+  const core = window.DiagnosticoMentoria;
+  const storageKey = 'mentoria-espartana-semana-3-auto-diagnostico-v1';
+  const questionnaire = document.getElementById('questionnaire');
+  const form = document.getElementById('diagnosticForm');
+  const results = document.getElementById('results');
+  const answeredMetric = document.getElementById('answeredMetric');
+  const progressText = document.getElementById('progressText');
+  const progressFill = document.getElementById('progressFill');
+  const savedText = document.getElementById('savedText');
+  const toast = document.getElementById('toast');
+
+  const pillarDescriptions = {
+    'Entrega': 'Resultado real, mensurável e visível para quem decide.',
+    'Previsibilidade': 'O dono sabe o que esperar de você quando a pressão sobe.',
+    'Alinhamento': 'Você protege a empresa mesmo quando está contrariado.',
+    'Consistência': 'Seu padrão se repete por tempo suficiente para virar confiança.'
+  };
+
+  const tagClass = {
+    'Entrega': 'tag-entrega',
+    'Previsibilidade': 'tag-previsibilidade',
+    'Alinhamento': 'tag-alinhamento',
+    'Consistência': 'tag-consistência'
+  };
+
+  function buildQuestionnaire() {
+    if (questionnaire.querySelectorAll('.criterion').length === core.criteria.length) {
+      return;
+    }
+    questionnaire.innerHTML = core.pillarOrder.map((pillar) => {
+      const items = core.criteria
+        .map((criterion, index) => Object.assign({}, criterion, { index: index }))
+        .filter((criterion) => criterion.pillar === pillar);
+      const criteriaMarkup = items.map((criterion) => `
+        <article class="criterion" id="criterion-${criterion.index}" data-index="${criterion.index}" data-pillar="${criterion.pillar}">
+          <div>
+            <div class="criterion-title">${criterion.title}</div>
+            <div class="criterion-question">${criterion.question}</div>
+            <div class="criterion-rule">${criterion.rule}</div>
+          </div>
+          <div class="score-control">
+            <label for="score-${criterion.index}">Nota</label>
+            <input class="score-input" id="score-${criterion.index}" name="score-${criterion.index}" type="number" inputmode="numeric" min="0" max="10" step="1" placeholder="-" aria-describedby="score-hint-${criterion.index}">
+            <div class="score-hint" id="score-hint-${criterion.index}">0 a 10</div>
+          </div>
+          <div class="proof-control">
+            <label for="proof-${criterion.index}">Prova concreta</label>
+            <textarea id="proof-${criterion.index}" name="proof-${criterion.index}" placeholder="Escreva a evidência real. Número, data, situação, hábito ou exemplo concreto."></textarea>
+            <div class="field-error">Preencha nota e prova concreta antes de calcular.</div>
+          </div>
+        </article>
+      `).join('');
+
+      return `
+        <section class="pillar" id="pillar-${pillar}">
+          <div class="pillar-head">
+            <div>
+              <h2>${pillar}</h2>
+              <p>${pillarDescriptions[pillar]}</p>
+            </div>
+            <div class="pill-tag ${tagClass[pillar]}">3 critérios</div>
+          </div>
+          <div class="criteria">${criteriaMarkup}</div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  function storageGet(key) {
+    try {
+      return window.localStorage ? window.localStorage.getItem(key) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function storageSet(key, value) {
+    try {
+      if (window.localStorage) window.localStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function storageRemove(key) {
+    try {
+      if (window.localStorage) window.localStorage.removeItem(key);
+    } catch (error) {
+      return false;
+    }
+    return true;
+  }
+
+  function getResponses() {
+    return core.criteria.map((criterion, index) => {
+      const scoreInput = document.getElementById(`score-${index}`);
+      const proofInput = document.getElementById(`proof-${index}`);
+      return {
+        index,
+        pillar: criterion.pillar,
+        title: criterion.title,
+        scoreRaw: scoreInput.value,
+        score: core.clampScore(scoreInput.value),
+        proof: proofInput.value.trim()
+      };
+    });
+  }
+
+  function isAnswered(response) {
+    return response.scoreRaw !== '' && response.proof.length >= 3;
+  }
+
+  function updateProgress() {
+    const responses = getResponses();
+    const answered = responses.filter(isAnswered).length;
+    const percent = Math.round((answered / core.criteria.length) * 100);
+    answeredMetric.textContent = `${answered}/${core.criteria.length}`;
+    progressText.textContent = `${percent}% preenchido`;
+    progressFill.style.width = `${percent}%`;
+  }
+
+  function saveProgress() {
+    const payload = getResponses().map((response) => ({
+      scoreRaw: response.scoreRaw,
+      proof: response.proof
+    }));
+    const saved = storageSet(storageKey, JSON.stringify(payload));
+    savedText.textContent = saved ? 'Progresso salvo neste computador' : 'Preenchimento ativo nesta tela';
+  }
+
+  function restoreProgress() {
+    try {
+      const payload = JSON.parse(storageGet(storageKey) || '[]');
+      payload.forEach((item, index) => {
+        const scoreInput = document.getElementById(`score-${index}`);
+        const proofInput = document.getElementById(`proof-${index}`);
+        if (scoreInput && item.scoreRaw !== undefined) scoreInput.value = item.scoreRaw;
+        if (proofInput && item.proof !== undefined) proofInput.value = item.proof;
+      });
+    } catch (error) {
+      storageRemove(storageKey);
+    }
+    updateProgress();
+  }
+
+  function validateResponses() {
+    const responses = getResponses();
+    let firstInvalid = null;
+    responses.forEach((response) => {
+      const article = document.getElementById(`criterion-${response.index}`);
+      const validScore = response.scoreRaw !== '' && Number(response.scoreRaw) >= 0 && Number(response.scoreRaw) <= 10;
+      const validProof = response.proof.length >= 3;
+      const valid = validScore && validProof;
+      article.classList.toggle('invalid', !valid);
+      if (!valid && firstInvalid === null) firstInvalid = article;
+    });
+
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const input = firstInvalid.querySelector('input, textarea');
+      if (input) input.focus({ preventScroll: true });
+      return null;
+    }
+
+    return responses.map((response) => ({
+      pillar: response.pillar,
+      score: response.score,
+      proof: response.proof
+    }));
+  }
+
+  function scoreColor(score) {
+    if (score <= 3) return 'var(--red)';
+    if (score <= 6) return 'var(--gold)';
+    if (score <= 8) return 'var(--blue)';
+    return 'var(--green)';
+  }
+
+  function renderResults(result) {
+    document.getElementById('resultTitle').textContent = `Diagnóstico: ${result.band.label}`;
+    document.getElementById('resultLead').textContent = result.band.analysis;
+    document.getElementById('diagnosisLabel').textContent = result.band.label;
+    document.getElementById('diagnosisLabel').style.color = result.band.color;
+    document.getElementById('totalScore').textContent = `${result.total}/${result.max}`;
+    document.getElementById('averageScore').textContent = `${result.average.toFixed(1)}/10`;
+    document.getElementById('mainAnalysis').textContent = result.band.analysis;
+    document.getElementById('focusHeading').textContent = result.focusHeading;
+    document.getElementById('weakAnalysis').textContent = `${result.focusLabel}. ${result.weakRisk}`;
+    document.getElementById('actionPlan').textContent = result.actionPlan;
+    document.getElementById('copySummary').value = result.summary;
+
+    document.getElementById('pillarBars').innerHTML = result.pillarScores.map((pillarScore) => `
+      <div class="pillar-bar-row">
+        <div class="pillar-name">${pillarScore.pillar}</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${pillarScore.average * 10}%; background:${scoreColor(pillarScore.average)}"></div></div>
+        <div class="pillar-number">${pillarScore.total}/${pillarScore.max}</div>
+      </div>
+    `).join('');
+
+    results.hidden = false;
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function clearAll() {
+    if (!confirm('Limpar todas as respostas deste diagnóstico?')) return;
+    storageRemove(storageKey);
+    form.reset();
+    document.querySelectorAll('.criterion.invalid').forEach((item) => item.classList.remove('invalid'));
+    results.hidden = true;
+    updateProgress();
+    savedText.textContent = 'Respostas apagadas';
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  function printReport() {
+    if (results.hidden) {
+      showToast('Calcule o diagnóstico antes de imprimir');
+      return;
+    }
+    window.print();
+  }
+
+  buildQuestionnaire();
+  restoreProgress();
+
+  form.addEventListener('input', (event) => {
+    const target = event.target;
+    if (target.classList.contains('score-input')) {
+      const value = Number(target.value);
+      if (target.value !== '' && Number.isFinite(value)) {
+        if (value < 0) target.value = 0;
+        if (value > 10) target.value = 10;
+      }
+    }
+    const criterion = target.closest('.criterion');
+    if (criterion) criterion.classList.remove('invalid');
+    updateProgress();
+    saveProgress();
+    results.hidden = true;
+  });
+
+  function handleCalculate(event) {
+    if (event) event.preventDefault();
+    const validResponses = validateResponses();
+    if (!validResponses) return false;
+    const result = core.calculateDiagnosis(validResponses);
+    renderResults(result);
+    return false;
+  }
+
+  window.handleCalculate = handleCalculate;
+  form.addEventListener('submit', handleCalculate);
+  document.getElementById('calcBtn').addEventListener('click', handleCalculate);
+
+  document.getElementById('clearBtn').addEventListener('click', clearAll);
+  document.getElementById('clearTopBtn').addEventListener('click', clearAll);
+  document.getElementById('printBtn').addEventListener('click', printReport);
+  document.getElementById('printTopBtn').addEventListener('click', printReport);
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = document.getElementById('copySummary').value;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Resumo copiado');
+    } catch (error) {
+      const area = document.getElementById('copySummary');
+      area.focus();
+      area.select();
+      document.execCommand('copy');
+      showToast('Resumo selecionado');
+    }
+  });
+})();
+</script>
+</body>
+</html>
